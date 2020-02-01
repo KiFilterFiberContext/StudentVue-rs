@@ -30,18 +30,12 @@ impl<'a> WebHandle<'a> {
         unimplemented!()
     }
 
-    pub async fn make_web_request(
-        &self,
-        uri: Option<&str>,
-        method: Option<Method>,
-        params: impl Serialize,
-        headers: impl Into<HeaderMap>
-    ) -> WebResult<Response>
+    pub async fn make_web_request<S: Serialize>(&self, uri: &str, method: Method, params: S, headers: HeaderMap) -> WebResult<Response>
     {
         let client = Client::new();
         let request = client
-            .request(method.unwrap_or(Method::POST), uri.unwrap_or(&self.uri))
-            .headers(headers)
+            .request(method, uri)
+            .headers(headers.into())
             .form(&params)
             .send()
             .await?;
@@ -49,8 +43,19 @@ impl<'a> WebHandle<'a> {
         Ok(request)
     }
 
-    pub async fn send() -> WebResult<String> {
-        unimplemented!()
+    pub async fn send(
+        &self,
+        uri: Option<&str>,
+        method: Option<Method>,
+        params: impl Serialize,
+        headers: impl Into<HeaderMap>
+    ) -> WebResult<String> {
+        Ok(
+            self.make_web_request(uri.unwrap_or(&self.uri), method.unwrap_or(Method::POST), params, headers.into())
+                .await?
+                .text()
+                .await?
+        )
     }
 }
 
