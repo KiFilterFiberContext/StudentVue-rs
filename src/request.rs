@@ -55,10 +55,10 @@ impl<'a> WebHandle<'a> {
         uri: Option<&str>,
         method: Option<Method>,
         params: impl Serialize,
-        headers: impl Into<HeaderMap>
+        headers: Option<HeaderMap>
     ) -> WebResult<String> {
         Ok(
-            self.make_web_request(uri.unwrap_or(&self.uri), method.unwrap_or(Method::POST), params, headers.into())
+            self.make_web_request(uri.unwrap_or(&self.uri), method.unwrap_or(Method::POST), params, headers.unwrap_or(self.get_default_headers()))
                 .await?
                 .text()
                 .await?
