@@ -4,7 +4,9 @@ use std::{
 };
 use reqwest::{
     Client,
-    header::HeaderMap
+    Method,
+    header::HeaderMap,
+    Response,
 };
 use super::WebResult;
 use serde::Serialize;
@@ -14,33 +16,41 @@ use serde::Serialize;
 pub const ENDPOINT: &str = "/Service/PXPCommunication.asmx/ProcessWebServiceRequest";
 
 pub struct WebHandle<'a> {
-    uri: Cow<'a, str>,
+    pub uri: Cow<'a, str>,
 }
 
 impl<'a> WebHandle<'a> {
-    async fn new(district_uri: &str) -> WebHandle<'a> {
+    pub async fn new(district_uri: &str) -> WebHandle<'a> {
         WebHandle {
             uri: format!("{}{}", district_uri, ENDPOINT).into(),
         }
     }
 
-    async fn send_post_req<S, H>(&self, uri: Option<&str>, params: S, headers: H) -> WebResult<String>
-    where
-        S: Serialize,
-        H: Into<HeaderMap>
+    pub fn get_default_headers() -> HeaderMap {
+        unimplemented!()
+    }
+
+    pub async fn make_web_request(
+        &self,
+        uri: Option<&str>,
+        method: Option<Method>,
+        params: impl Serialize,
+        headers: impl Into<HeaderMap>
+    ) -> WebResult<Response>
     {
         let client = Client::new();
-        let request = client.post(uri.unwrap_or(&self.uri.deref()))
+        let request = client
+            .request(method.unwrap_or(Method::POST), uri.unwrap_or(&self.uri))
+            .headers(headers)
             .form(&params)
-            .headers(headers.into())
             .send()
             .await?;
 
-        Ok(
-            request
-                .text()
-                .await?
-        )
+        Ok(request)
+    }
+
+    pub async fn send() -> WebResult<String> {
+        unimplemented!()
     }
 }
 
