@@ -6,6 +6,7 @@ use reqwest::{
     Client,
     Method,
     header::HeaderMap,
+    header::{CONTENT_TYPE, HOST, ACCEPT_ENCODING, USER_AGENT},
     Response,
 };
 use super::WebResult;
@@ -26,8 +27,14 @@ impl<'a> WebHandle<'a> {
         }
     }
 
-    pub fn get_default_headers() -> HeaderMap {
-        unimplemented!()
+    pub fn get_default_headers(&self) -> HeaderMap {
+        let mut headers = HeaderMap::with_capacity(4);
+        headers.insert(HOST, self.uri.deref().parse().unwrap());
+        headers.insert(CONTENT_TYPE, "application/x-www-form-urlencoded".parse().unwrap());
+        headers.insert(ACCEPT_ENCODING, "gzip".parse().unwrap());
+        headers.insert(USER_AGENT, "ksoap2-android/2.6.0+".parse().unwrap());
+
+        headers
     }
 
     pub async fn make_web_request<S: Serialize>(&self, uri: &str, method: Method, params: S, headers: HeaderMap) -> WebResult<Response>
