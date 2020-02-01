@@ -11,3 +11,4 @@ tokio = { version = "0.2.11", features = ["full"] }
 quick-xml = "0.17.2"
 serde = "1.0.104"
 reqwest = "0.10.1"
+htmlescape = "0.3.1"

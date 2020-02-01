@@ -1,7 +1,3 @@
-use std::{
-    borrow::Cow,
-    ops::Deref,
-};
 use reqwest::{
     Client,
     Method,
@@ -11,25 +7,18 @@ use reqwest::{
 };
 use super::WebResult;
 use serde::Serialize;
+use htmlescape::decode_html;
 
-// POST request endpoint (ProcessWebServiceRequest is redundant for SOAP requests)
-// In this case since we are solely making regular POST requests it is required
-pub const ENDPOINT: &str = "/Service/PXPCommunication.asmx/ProcessWebServiceRequest";
+/// Struct which manages and sends web requests asynchronously
+pub struct WebHandle;
 
-pub struct WebHandle<'a> {
-    pub uri: Cow<'a, str>,
-}
-
-impl<'a> WebHandle<'a> {
-    pub async fn new(district_uri: &str) -> WebHandle<'a> {
-        WebHandle {
-            uri: format!("{}{}", district_uri, ENDPOINT).into(),
-        }
-    }
-
-    pub fn get_default_headers(&self) -> HeaderMap {
-        let mut headers = HeaderMap::with_capacity(4);
-        headers.insert(HOST, self.uri.deref().parse().unwrap());
+impl WebHandle {
+    /// Returns the default headers for **POST** requests from the StudentVue app
+    ///
+    /// # Headers:
+    /// Content-Type, Accept-Encoding, User-Agent
+    pub fn get_default_headers() -> HeaderMap {
+        let mut headers = HeaderMap::with_capacity(3);
         headers.insert(CONTENT_TYPE, "application/x-www-form-urlencoded".parse().unwrap());
         headers.insert(ACCEPT_ENCODING, "gzip".parse().unwrap());
         headers.insert(USER_AGENT, "ksoap2-android/2.6.0+".parse().unwrap());
@@ -37,12 +26,36 @@ impl<'a> WebHandle<'a> {
         headers
     }
 
-    pub async fn make_web_request<S: Serialize>(&self, uri: &str, method: Method, params: S, headers: HeaderMap) -> WebResult<Response>
+    /// Asynchronously sends a HTTP Request requiring manual parameters which returns a [Response](https://docs.rs/reqwest/0.10.1/reqwest/struct.Response.html)
+    ///
+    /// ```
+    /// use studentvue::request::WebHandle;
+    /// use reqwest::{
+    ///     header::HeaderMap,
+    ///     Method,
+    /// };
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let params: Vec<&str> = Vec::new();
+    ///     let req = WebHandle::make_web_request("https://www.google.com", Method::POST, params, HeaderMap::new())
+    ///         .await?;
+    ///
+    ///     println!("{:?}", req.status());
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    pub async fn make_web_request<R, M, S>(uri: R, method: M, params: S, headers: HeaderMap) -> WebResult<Response>
+    where
+        R: AsRef<str>,
+        M: Into<Method>,
+        S: Serialize
     {
         let client = Client::new();
         let request = client
-            .request(method, uri)
-            .headers(headers.into())
+            .request(method.into(), uri.as_ref())
+            .headers(headers)
             .form(&params)
             .send()
             .await?;
@@ -50,21 +63,37 @@ impl<'a> WebHandle<'a> {
         Ok(request)
     }
 
-    pub async fn send(
-        &self,
-        uri: Option<&str>,
-        method: Option<Method>,
-        params: impl Serialize,
-        headers: Option<HeaderMap>
-    ) -> WebResult<String> {
-        Ok(
-            self.make_web_request(
-                uri.unwrap_or(&self.uri), method.unwrap_or(Method::POST), params, headers.unwrap_or(self.get_default_headers())
-            )
-                .await?
-                .text()
-                .await?
-        )
+    /// Asynchronously sends a POST request to the corresponding WebService endpoint or an optional url with specified parameters
+    /// Optionally HTML escapes the response
+    ///
+    /// ```
+    /// use studentvue::request::WebHandle;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let res = WebHandle::send("https://afsd.edupoint.com/Service/PXPCommunication.asmx/ProcessWebServiceRequest", &[("key", "value")], true)
+    ///         .await?;
+    ///
+    ///     // ...
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    pub async fn send(uri: impl AsRef<str>, params: impl Serialize, decode: bool) -> WebResult<String> {
+        let req = WebHandle::make_web_request(uri, Method::POST, params, WebHandle::get_default_headers())
+            .await?
+            .text()
+            .await?;
+
+        let res = if decode {
+            decode_html(req.as_str())
+                .unwrap_or_default() // TODO: Use map_err
+        }
+        else {
+            req
+        };
+
+        Ok(res)
     }
 }
 
@@ -73,7 +102,12 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn response_check() {
-        assert_eq!(2, 2);
+    async fn status_check() {
+        let status = WebHandle::make_web_request("http://www.google.com", Method::GET, <Vec<&str>>::new(), HeaderMap::new())
+            .await
+            .unwrap()
+            .status();
+
+        assert_eq!(status.as_str(), "200");
     }
 }
