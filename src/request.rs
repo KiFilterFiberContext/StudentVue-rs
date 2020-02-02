@@ -2,14 +2,15 @@ use reqwest::{
     Client,
     Method,
     header::HeaderMap,
-    header::{CONTENT_TYPE, HOST, ACCEPT_ENCODING, USER_AGENT},
+    header::*,
     Response,
 };
-use super::WebResult;
+use crate::WebResult;
 use serde::Serialize;
 use htmlescape::decode_html;
 
 /// Struct which manages and sends web requests asynchronously
+#[derive(Clone, Copy)]
 pub struct WebHandle;
 
 impl WebHandle {
@@ -17,6 +18,8 @@ impl WebHandle {
     ///
     /// # Headers:
     /// Content-Type, Accept-Encoding, User-Agent
+
+    // Considering using lazy_static in the future
     pub fn get_default_headers() -> HeaderMap {
         let mut headers = HeaderMap::with_capacity(3);
         headers.insert(CONTENT_TYPE, "application/x-www-form-urlencoded".parse().unwrap());
@@ -85,15 +88,14 @@ impl WebHandle {
             .text()
             .await?;
 
-        let res = if decode {
-            decode_html(req.as_str())
-                .unwrap_or_default() // TODO: Use map_err
+        return if decode {
+            Ok(
+                decode_html(req.as_str())
+                    .unwrap_or_default() // TODO: Use map_err
+            )
+        } else {
+            Ok(req)
         }
-        else {
-            req
-        };
-
-        Ok(res)
     }
 }
 

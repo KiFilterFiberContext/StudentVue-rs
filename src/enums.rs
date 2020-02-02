@@ -1,3 +1,5 @@
+use crate::XMLElement;
+
 #[derive(Debug)]
 pub enum WebServiceHandle {
     PXPWebServices,
@@ -44,21 +46,50 @@ pub enum Method {
 
 #[derive(Debug, PartialEq)]
 pub enum ParamType<'a> {
-    ChildIntID(u64),
-    HealthConditions(bool),
-    HealthVisits(bool),
-    HealthImmunizations(bool),
+    ChildIntID(&'a str), // u64
+    HealthConditions(&'a str), // u64
+    HealthVisits(&'a str), // bool
+    HealthImmunizations(&'a str), // bool
     ReportPeriod(&'a str),
     ConcurrentSchOrgYearGU(&'a str),
-    LoadAllTerms(bool),
+    LoadAllTerms,
     RequestDate(&'a str),
-    LanguageCode(u64),
+    AssignmentID(&'a str),
+    LanguageCode(&'a str), // u64
     ClassGU(&'a str),
+    StudentClassList(&'a str),
     SoundFileListing(&'a str),
     GBDocumentData(&'a str),
-    Key(&'a str),
+    Key,
     MatchToDistrictZipCode(&'a str),
-    Empty,
+}
+
+impl<'p> ToString for ParamType<'p> {
+    fn to_string(&self) -> String {
+        let (name, value) = match self {
+            ParamType::ChildIntID(id) => ("ChildIntID", id),
+            ParamType::HealthConditions(c) => ("HealthConditions", c),
+            ParamType::HealthVisits(v) => ("HealthVisits", v),
+            ParamType::HealthImmunizations(imm) => ("HealthImmunizations", imm),
+            ParamType::ConcurrentSchOrgYearGU(gu) => ("ConcurrentSchOrgYearGU", gu),
+            ParamType::ReportPeriod(period) => ("ReportPeriod", period),
+            ParamType::StudentClassList(list) => ("StudentClassList", list),
+            ParamType::RequestDate(date) => ("RequestDate", date),
+            ParamType::LanguageCode(lang_id) => ("LanguageCode", lang_id),
+            ParamType::ClassGU(class_gu) => ("ClassGU", class_gu),
+            ParamType::AssignmentID(id) => ("AssignmentID", id),
+            ParamType::SoundFileListing(listing) => ("SoundFileListing", listing),
+            ParamType::GBDocumentData(data) => ("GBDocumentData", data),
+            ParamType::Key => ("Key", &"5E4B7859-B805-474B-A833-FDB15D205D40"),
+            ParamType::MatchToDistrictZipCode(zip) => ("MatchToDistrictZipCode", zip),
+            ParamType::LoadAllTerms => ("LoadAllTerms", &"true")
+        };
+
+        let mut param = XMLElement::new(name);
+        param.add_text(value);
+
+        param.to_string().replace("<?xml version = \"1.0\" encoding = \"UTF-8\"?>\n", "")
+    }
 }
 
 impl<'w> Into<&'w str> for WebServiceHandle {
