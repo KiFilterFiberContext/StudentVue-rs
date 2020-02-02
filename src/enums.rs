@@ -1,5 +1,3 @@
-use crate::XMLElement;
-
 #[derive(Debug)]
 pub enum WebServiceHandle {
     PXPWebServices,
@@ -85,10 +83,8 @@ impl<'p> ToString for ParamType<'p> {
             ParamType::LoadAllTerms => ("LoadAllTerms", &"true")
         };
 
-        let mut param = XMLElement::new(name);
-        param.add_text(value);
-
-        param.to_string().replace("<?xml version = \"1.0\" encoding = \"UTF-8\"?>\n", "")
+        // lol
+        format!("\n<{}>{}</{}>", name, value, name)
     }
 }
 

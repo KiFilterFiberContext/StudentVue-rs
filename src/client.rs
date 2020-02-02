@@ -1,17 +1,16 @@
-use std::{
-    borrow::Cow,
-    fmt,
-};
 use crate::{
     request::WebHandle,
     WebResult,
     enums::*,
-    XMLElement,
+};
+use std::{
+    borrow::Cow,
+    fmt,
 };
 
 // POST request endpoint (ProcessWebServiceRequest is redundant for SOAP requests)
 // In this case since we are solely making regular POST requests it is required
-pub const ENDPOINT: &str = "/Service/PXPCommunication.asmx/ProcessWebServiceRequest";
+static ENDPOINT: &str = "/Service/PXPCommunication.asmx/ProcessWebServiceRequest";
 
 /// Struct which connects to the StudentVUE service
 #[derive(Debug, Clone, PartialEq)]
@@ -34,7 +33,13 @@ impl<'c> Client<'c> {
             pwd: password,
         }
     }
-    pub async fn call_service(&self, web_service_handle: WebServiceHandle, method_name: Method, param_str: ParamBuilder) -> WebResult<String> {
+
+    pub async fn call_service(
+        &self,
+        web_service_handle: WebServiceHandle,
+        method_name: Method,
+        param_str: ParamBuilder,
+    ) -> WebResult<String> {
         let body = [
             ("userID", self.user),
             ("password", self.pwd),
@@ -52,7 +57,7 @@ impl<'c> Client<'c> {
     }
 }
 
-impl<'p> ParamBuilder {
+impl ParamBuilder {
     pub fn create(len: usize) -> Self {
         ParamBuilder {
             children: Vec::with_capacity(len),
@@ -67,7 +72,7 @@ impl<'p> ParamBuilder {
 
 impl<'p> ToString for ParamBuilder {
     fn to_string(&self) -> String {
-        format!("<Parms>{}</Parms>", self.children.join(""))
+        format!("<Parms>{}\n</Parms>", self.children.join(""))
     }
 }
 
@@ -75,9 +80,17 @@ impl<'p> ToString for ParamBuilder {
 mod tests {
     use super::*;
 
-    #[tokio::test]
-    async fn request1() {
+    #[test]
+    fn xml_building() {
+        let mut params = ParamBuilder::create(5)
+            .add_element(ParamType::Key)
+            .add_element(ParamType::AssignmentID("e2qekn"))
+            .add_element(ParamType::ChildIntID("01"))
+            .add_element(ParamType::LanguageCode("00"))
+            .add_element(ParamType::RequestDate("1/23/19"));
 
+        let res = "<Parms>\n<Key>5E4B7859-B805-474B-A833-FDB15D205D40</Key>\n<AssignmentID>e2qekn</AssignmentID>\n<ChildIntID>01</ChildIntID>\n<LanguageCode>00</LanguageCode>\n<RequestDate>1/23/19</RequestDate>\n</Parms>";
+        assert_eq!(&params.to_string(), res);
     }
 }
 

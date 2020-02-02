@@ -1,3 +1,5 @@
+use crate::WebResult;
+use std::ops::Deref;
 use reqwest::{
     Client,
     Method,
@@ -5,30 +7,24 @@ use reqwest::{
     header::*,
     Response,
 };
-use crate::WebResult;
-use serde::Serialize;
-use htmlescape::decode_html;
+use lazy_static::lazy_static;
+
+lazy_static! {
+    pub static ref DEFAULT_HEADERS: HeaderMap<HeaderValue> = {
+        let mut hm = HeaderMap::with_capacity(3);
+        hm.insert(CONTENT_TYPE, "application/x-www-form-urlencoded".parse().unwrap());
+        hm.insert(ACCEPT_ENCODING, "gzip".parse().unwrap());
+        hm.insert(USER_AGENT, "ksoap2-android/2.6.0+".parse().unwrap());
+
+        hm
+    };
+}
 
 /// Struct which manages and sends web requests asynchronously
 #[derive(Clone, Copy)]
 pub struct WebHandle;
 
 impl WebHandle {
-    /// Returns the default headers for **POST** requests from the StudentVue app
-    ///
-    /// # Headers:
-    /// Content-Type, Accept-Encoding, User-Agent
-
-    // Considering using lazy_static in the future
-    pub fn get_default_headers() -> HeaderMap {
-        let mut headers = HeaderMap::with_capacity(3);
-        headers.insert(CONTENT_TYPE, "application/x-www-form-urlencoded".parse().unwrap());
-        headers.insert(ACCEPT_ENCODING, "gzip".parse().unwrap());
-        headers.insert(USER_AGENT, "ksoap2-android/2.6.0+".parse().unwrap());
-
-        headers
-    }
-
     /// Asynchronously sends a HTTP Request requiring manual parameters which returns a [Response](https://docs.rs/reqwest/0.10.1/reqwest/struct.Response.html)
     ///
     /// ```
@@ -41,7 +37,7 @@ impl WebHandle {
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///     let params: Vec<&str> = Vec::new();
-    ///     let req = WebHandle::make_web_request("https://www.google.com", Method::POST, params, HeaderMap::new())
+    ///     let req = WebHandle::make_web_request("https://www.google.com", Method::POST, params, &HeaderMap::new())
     ///         .await?;
     ///
     ///     println!("{:?}", req.status());
@@ -49,16 +45,16 @@ impl WebHandle {
     /// }
     /// ```
     ///
-    pub async fn make_web_request<R, M, S>(uri: R, method: M, params: S, headers: HeaderMap) -> WebResult<Response>
+    pub async fn make_web_request<R, M, S>(uri: R, method: M, params: S, headers: &HeaderMap) -> WebResult<Response>
     where
         R: AsRef<str>,
         M: Into<Method>,
-        S: Serialize
+        S: serde::Serialize
     {
         let client = Client::new();
         let request = client
             .request(method.into(), uri.as_ref())
-            .headers(headers)
+            .headers(headers.clone())
             .form(&params)
             .send()
             .await?;
@@ -82,20 +78,20 @@ impl WebHandle {
     /// }
     /// ```
     ///
-    pub async fn send(uri: impl AsRef<str>, params: impl Serialize, decode: bool) -> WebResult<String> {
-        let req = WebHandle::make_web_request(uri, Method::POST, params, WebHandle::get_default_headers())
+    pub async fn send(uri: impl AsRef<str>, params: impl serde::Serialize, decode: bool) -> WebResult<String> {
+        let req = WebHandle::make_web_request(uri, Method::POST, params, DEFAULT_HEADERS.deref())
             .await?
             .text()
             .await?;
 
         return if decode {
             Ok(
-                decode_html(req.as_str())
+                htmlescape::decode_html(req.as_str())
                     .unwrap_or_default() // TODO: Use map_err
             )
         } else {
             Ok(req)
-        }
+        };
     }
 }
 
@@ -105,7 +101,7 @@ mod tests {
 
     #[tokio::test]
     async fn status_check() {
-        let status = WebHandle::make_web_request("http://www.google.com", Method::GET, <Vec<&str>>::new(), HeaderMap::new())
+        let status = WebHandle::make_web_request("http://www.google.com", Method::GET, <Vec<&str>>::new(), &HeaderMap::new())
             .await
             .unwrap()
             .status();
