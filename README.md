@@ -9,19 +9,16 @@
 
 ## Usage 
 ```rust
-use studentvue::{
-    client::Client,
-    enums::*,
-    ParamBuilder,
-};
+use studentvue::client::Client;
 
 #[tokio::main]
 async fn main() {
-    let client = Client::create("https://studentvue.phoenixunion.org", "4183350", "1Pud95727");
-    let gradedata = client.get_grades(Some(2))
-        .await.expect("Could not view grades!");
+    let client = Client::create("https://studentvue.phoenixunion.org", env!("USER"), env!("PWD"));
+    let xml_data = client.get_grades(None)
+        .await
+        .expect("Could not view grades!");
 
-    println!("{}", gradedata);
+    println!("{}", xml_data);
     Ok(())
 }
 ```
