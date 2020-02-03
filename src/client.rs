@@ -70,6 +70,14 @@ impl<'c> Client<'c> {
                 .await?
         )
     }
+
+    #[inline]
+    pub async fn get_attendance(&self) -> WebResult<String> {
+        Ok(
+            self.call_service(WebServiceHandle::PXPWebServices, Method::Attendance, ParamBuilder::create())
+                .await?
+        )
+    }
 }
 
 impl ParamBuilder {
@@ -80,11 +88,13 @@ impl ParamBuilder {
     }
 
     pub fn create_with_size(size: usize) -> Self {
+        assert!(size > 0);
         ParamBuilder {
             children: Vec::with_capacity(size),
         }
     }
 
+    #[inline]
     pub fn add_element(&mut self, param: ParamType) -> Self {
         self.children.push(format!("\n{}", param.to_string()));
         self.clone()
@@ -92,7 +102,6 @@ impl ParamBuilder {
 }
 
 impl<'p> ToString for ParamBuilder {
-    #[inline]
     fn to_string(&self) -> String {
         format!("<Parms>{}\n</Parms>", self.children.join(""))
     }

@@ -45,6 +45,7 @@ impl WebHandle {
     /// }
     /// ```
     ///
+    #[inline]
     pub async fn make_web_request<R, M, S>(uri: R, method: M, params: S, headers: &HeaderMap) -> WebResult<Response>
     where
         R: AsRef<str>,
