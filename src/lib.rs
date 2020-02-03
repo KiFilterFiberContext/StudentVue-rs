@@ -1,4 +1,4 @@
-type WebResult<T> = Result<T, Box<dyn std::error::Error>>;
+type WebResult<T, E=Box<dyn std::error::Error>> = Result<T, E>;
 
 pub mod client;
 pub mod enums;

@@ -9,7 +9,6 @@
 
 ## Usage 
 ```rust
-<<<<<<< HEAD
 use studentvue::client::Client;
 
 #[tokio::main]
@@ -20,13 +19,6 @@ async fn main() {
         .expect("Could not view grades!");
 
     println!("{}", xml_data);
-=======
-// Using tokio runtime
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // example...
->>>>>>> parent of 723c972... Basic client function implemented
-    Ok(())
 }
 ```
 

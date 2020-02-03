@@ -42,18 +42,29 @@ pub enum Method {
     StudentClassList,
 }
 
+#[derive(Debug, PartialEq, PartialOrd)]
+pub enum Language {
+    English = 0,
+    Spanish = 1,
+}
+
 #[derive(Debug, PartialEq)]
 pub enum ParamType<'a> {
-    ChildIntID(&'a str), // u64
-    HealthConditions(&'a str), // u64
-    HealthVisits(&'a str), // bool
-    HealthImmunizations(&'a str), // bool
-    ReportPeriod(&'a str),
+    ChildIntID(u64),
+    // u64
+    HealthConditions(u64),
+    // u64
+    HealthVisits(bool),
+    // bool
+    HealthImmunizations(bool),
+    // bool
+    ReportPeriod(u64),
     ConcurrentSchOrgYearGU(&'a str),
     LoadAllTerms,
     RequestDate(&'a str),
     AssignmentID(&'a str),
-    LanguageCode(&'a str), // u64
+    LanguageCode(u64),
+    // u64
     ClassGU(&'a str),
     StudentClassList(&'a str),
     SoundFileListing(&'a str),
@@ -64,27 +75,24 @@ pub enum ParamType<'a> {
 
 impl<'p> ToString for ParamType<'p> {
     fn to_string(&self) -> String {
-        let (name, value) = match self {
-            ParamType::ChildIntID(id) => ("ChildIntID", id),
-            ParamType::HealthConditions(c) => ("HealthConditions", c),
-            ParamType::HealthVisits(v) => ("HealthVisits", v),
-            ParamType::HealthImmunizations(imm) => ("HealthImmunizations", imm),
-            ParamType::ConcurrentSchOrgYearGU(gu) => ("ConcurrentSchOrgYearGU", gu),
-            ParamType::ReportPeriod(period) => ("ReportPeriod", period),
-            ParamType::StudentClassList(list) => ("StudentClassList", list),
-            ParamType::RequestDate(date) => ("RequestDate", date),
-            ParamType::LanguageCode(lang_id) => ("LanguageCode", lang_id),
-            ParamType::ClassGU(class_gu) => ("ClassGU", class_gu),
-            ParamType::AssignmentID(id) => ("AssignmentID", id),
-            ParamType::SoundFileListing(listing) => ("SoundFileListing", listing),
-            ParamType::GBDocumentData(data) => ("GBDocumentData", data),
-            ParamType::Key => ("Key", &"5E4B7859-B805-474B-A833-FDB15D205D40"),
-            ParamType::MatchToDistrictZipCode(zip) => ("MatchToDistrictZipCode", zip),
-            ParamType::LoadAllTerms => ("LoadAllTerms", &"true")
-        };
-
-        // lol
-        format!("\n<{}>{}</{}>", name, value, name)
+        match self {
+            ParamType::ChildIntID(id) => format!("<ChildIntID>{}</ChildIntID>", id),
+            ParamType::HealthConditions(c) => format!("<HealthConditions>{}</HealthConditions>", c),
+            ParamType::HealthVisits(v) => format!("<HealthVisits>{}</HealthVisits>", v),
+            ParamType::HealthImmunizations(imm) => format!("<HealthImmunizations>{}</HealthImmunizations>", imm),
+            ParamType::ConcurrentSchOrgYearGU(gu) => format!("<ConcurrentSchOrgYearGU>{}</ConcurrentSchOrgYearGU>", gu),
+            ParamType::ReportPeriod(period) => format!("<ReportPeriod>{}</ReportPeriod>", period),
+            ParamType::StudentClassList(list) => format!("<StudentClassList>{}</StudentClassList>", list),
+            ParamType::RequestDate(date) => format!("<RequestDate>{}</RequestDate>", date),
+            ParamType::LanguageCode(lang_id) => format!("<LanguageCode>{}</LanguageCode>", lang_id),
+            ParamType::ClassGU(class_gu) => format!("<ClassGU>{}</ClassGU>", class_gu),
+            ParamType::AssignmentID(id) => format!("<AssignmentID>{}</AssignmentID>", id),
+            ParamType::SoundFileListing(listing) => format!("<SoundFileListing>{}</SoundFileListing>", listing),
+            ParamType::GBDocumentData(data) => format!("<GBDocumentData>{}</GBDocumentData>", data),
+            ParamType::Key => String::from("<Key>5E4B7859-B805-474B-A833-FDB15D205D40</Key>"),
+            ParamType::MatchToDistrictZipCode(zip) => format!("<MatchToDistrictZipCode>{}</MatchToDistrictZipCode>", zip),
+            ParamType::LoadAllTerms => String::from("<LoadAllTerms>true</LoadAllTerms>")
+        }
     }
 }
 
@@ -135,5 +143,16 @@ impl<'m> Into<&'m str> for Method {
             Method::GetSpecialEdData => "GetSpecialEdData",
             Method::StudentClassList => "StudentClassList",
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn format_test() {
+        let param = ParamType::ReportPeriod(7);
+        assert_eq!(&param.to_string()[..], "<ReportPeriod>7</ReportPeriod>")
     }
 }
