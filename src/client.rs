@@ -55,45 +55,22 @@ impl<'c> Client<'c> {
                 .await?
         )
     }
-
-    #[inline]
-    pub async fn get_grades(&self, report_period: Option<u64>) -> WebResult<String> {
-        let parms = if report_period.is_none() {
-            ParamBuilder::create()
-        } else {
-            ParamBuilder::create_with_size(1)
-                .add_element(ParamType::ReportPeriod(report_period.unwrap()))
-        };
-
-        Ok(
-            self.call_service(WebServiceHandle::PXPWebServices, Method::GradeBook, parms)
-                .await?
-        )
-    }
 }
 
 impl ParamBuilder {
-    pub fn create() -> Self {
+    pub fn create(len: usize) -> Self {
         ParamBuilder {
-            children: Vec::new(),
+            children: Vec::with_capacity(len),
         }
     }
 
-    pub fn create_with_size(size: usize) -> Self {
-        ParamBuilder {
-            children: Vec::with_capacity(size),
-        }
-    }
-
-    #[inline]
     pub fn add_element(&mut self, param: ParamType) -> Self {
-        self.children.push(format!("\n{}", param.to_string()));
+        self.children.push(param.to_string());
         self.clone()
     }
 }
 
 impl<'p> ToString for ParamBuilder {
-    #[inline]
     fn to_string(&self) -> String {
         format!("<Parms>{}\n</Parms>", self.children.join(""))
     }
@@ -105,14 +82,14 @@ mod tests {
 
     #[test]
     fn xml_building() {
-        let mut params = ParamBuilder::create_with_size(5)
+        let mut params = ParamBuilder::create(5)
+            .add_element(ParamType::Key)
             .add_element(ParamType::AssignmentID("e2qekn"))
-            .add_element(ParamType::ChildIntID(1))
-            .add_element(ParamType::LanguageCode(0))
-            .add_element(ParamType::RequestDate("1/23/19"))
-            .add_element(ParamType::HealthImmunizations(true));
+            .add_element(ParamType::ChildIntID("01"))
+            .add_element(ParamType::LanguageCode("00"))
+            .add_element(ParamType::RequestDate("1/23/19"));
 
-        let res = "<Parms>\n<AssignmentID>e2qekn</AssignmentID>\n<ChildIntID>1</ChildIntID>\n<LanguageCode>0</LanguageCode>\n<RequestDate>1/23/19</RequestDate>\n<HealthImmunizations>true</HealthImmunizations>\n</Parms>";
+        let res = "<Parms>\n<Key>5E4B7859-B805-474B-A833-FDB15D205D40</Key>\n<AssignmentID>e2qekn</AssignmentID>\n<ChildIntID>01</ChildIntID>\n<LanguageCode>00</LanguageCode>\n<RequestDate>1/23/19</RequestDate>\n</Parms>";
         assert_eq!(&params.to_string(), res);
     }
 }

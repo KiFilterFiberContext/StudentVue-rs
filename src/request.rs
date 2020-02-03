@@ -87,10 +87,9 @@ impl WebHandle {
         return if decode {
             Ok(
                 htmlescape::decode_html(req.as_str())
-                    .map_err(|e| format!("{:?}", e))?
+                    .unwrap_or_default() // TODO: Use map_err
             )
-        }
-        else {
+        } else {
             Ok(req)
         };
     }
