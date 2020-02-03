@@ -9,21 +9,29 @@
 
 ## Usage 
 ```rust
-// Using tokio runtime
+use studentvue::{
+    client::Client,
+    enums::*,
+    ParamBuilder,
+};
+
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // example...
+async fn main() {
+    let client = Client::create("https://studentvue.phoenixunion.org", "4183350", "1Pud95727");
+    let gradedata = client.get_grades(Some(2))
+        .await.expect("Could not view grades!");
+
+    println!("{}", gradedata);
     Ok(())
 }
 ```
 
 ## TODO
-- [ ] Redo XML Parsing
 - [ ] Basic client functionality 
-- [ ] Use Less Allocations
+- [ ] XML Parsing
+- [ ] Reduce Allocations
 - [ ] Documentation
 - [ ] Full Unit Testing
-- [ ] Code redo
 
 ## License
 MIT
