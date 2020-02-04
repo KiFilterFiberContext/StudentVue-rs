@@ -16,7 +16,7 @@ use studentvue::client::Client;
 
 #[tokio::main]
 async fn main() {
-    let client = Client::create("https://studentvue.phoenixunion.org", "4183350", "1Pud95727");
+    let client = Client::create("https://afsd.edupoint.com/", env!("SID"), env!("SPWD"));
     let grades = client.get_grades(None)
         .await
         .expect("Could not retrieve grades!");
