@@ -5,30 +5,32 @@
 
 ## Features
 - Retrieve grades
-- Get student information
+- Get student information (health, attendance)
+- View schedule
+- View calendar 
 
 ## Usage 
 ```rust
+// example usage
 use studentvue::client::Client;
 
 #[tokio::main]
 async fn main() {
-    let client = Client::create("https://studentvue.phoenixunion.org", env!("USER"), env!("PWD"));
-    let xml_data = client.get_grades(None)
+    let client = Client::create("https://studentvue.phoenixunion.org", "4183350", "1Pud95727");
+    let grades = client.get_grades(None)
         .await
-        .expect("Could not view grades!");
-
-    println!("{}", xml_data);
+        .expect("Could not retrieve grades!");
+    
+    grades.gradebook.courses.course.iter().for_each(|x|
+        println!("{}", x.class_name)
+    );
 }
 ```
 
 ## TODO
-- [ ] Redo XML Parsing
-- [ ] Basic client functionality 
-- [ ] Use Less Allocations
+- [ ] Reduce Allocations
 - [ ] Documentation
 - [ ] Full Unit Testing
-- [ ] Code redo
 
 ## License
 MIT
