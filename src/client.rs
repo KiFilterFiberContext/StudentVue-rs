@@ -2,11 +2,14 @@ use crate::{
     request::WebHandle,
     WebResult,
     enums::*,
+    xml::*,
 };
 use std::{
     borrow::Cow,
     fmt,
 };
+use quick_xml::de;
+use serde::Deserialize;
 
 // POST request endpoint (ProcessWebServiceRequest is redundant for SOAP requests)
 // In this case since we are solely making regular POST requests it is required
@@ -34,6 +37,7 @@ impl<'c> Client<'c> {
         }
     }
 
+    #[inline]
     pub async fn call_service(
         &self,
         web_service_handle: WebServiceHandle,
@@ -51,13 +55,13 @@ impl<'c> Client<'c> {
         ];
 
         Ok(
-            WebHandle::send(&self.uri, body, true)
+            WebHandle::send(&self.uri, body)
                 .await?
         )
     }
 
     #[inline]
-    pub async fn get_grades(&self, report_period: Option<u64>) -> WebResult<String> {
+    pub async fn get_grades(&self, report_period: Option<u64>) -> WebResult<GbData> {
         let parms = if report_period.is_none() {
             ParamBuilder::create()
         } else {
@@ -65,18 +69,10 @@ impl<'c> Client<'c> {
                 .add_element(ParamType::ReportPeriod(report_period.unwrap()))
         };
 
-        Ok(
-            self.call_service(WebServiceHandle::PXPWebServices, Method::GradeBook, parms)
-                .await?
-        )
-    }
+        let xml_data = self.call_service(WebServiceHandle::PXPWebServices, Method::GradeBook, parms)
+                .await?;
 
-    #[inline]
-    pub async fn get_attendance(&self) -> WebResult<String> {
-        Ok(
-            self.call_service(WebServiceHandle::PXPWebServices, Method::Attendance, ParamBuilder::create())
-                .await?
-        )
+        Ok(de::from_str(xml_data.as_str())?)
     }
 }
 

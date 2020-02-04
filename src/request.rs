@@ -71,7 +71,7 @@ impl WebHandle {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let res = WebHandle::send("https://afsd.edupoint.com/Service/PXPCommunication.asmx/ProcessWebServiceRequest", &[("key", "value")], true)
+    ///     let res = WebHandle::send("https://afsd.edupoint.com/Service/PXPCommunication.asmx/ProcessWebServiceRequest", &[("key", "value")])
     ///         .await?;
     ///
     ///     // ...
@@ -79,20 +79,17 @@ impl WebHandle {
     /// }
     /// ```
     ///
-    pub async fn send(uri: impl AsRef<str>, params: impl serde::Serialize, decode: bool) -> WebResult<String> {
+    pub async fn send(uri: impl AsRef<str>, params: impl serde::Serialize) -> WebResult<String> {
         let req = WebHandle::make_web_request(uri, Method::POST, params, DEFAULT_HEADERS.deref())
             .await?
             .text()
             .await?;
 
-        return if decode {
-            Ok(
-                htmlescape::decode_html(req.as_str())
-                    .map_err(|e| format!("{:?}", e))?
-            )
-        } else {
-            Ok(req)
-        };
+        Ok(
+            String::from_utf8_lossy(req.as_bytes())
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+        )
     }
 }
 

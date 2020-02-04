@@ -51,20 +51,15 @@ pub enum Language {
 #[derive(Debug, PartialEq)]
 pub enum ParamType<'a> {
     ChildIntID(u64),
-    // u64
     HealthConditions(u64),
-    // u64
     HealthVisits(bool),
-    // bool
     HealthImmunizations(bool),
-    // bool
     ReportPeriod(u64),
     ConcurrentSchOrgYearGU(&'a str),
     LoadAllTerms,
     RequestDate(&'a str),
     AssignmentID(&'a str),
     LanguageCode(u64),
-    // u64
     ClassGU(&'a str),
     StudentClassList(&'a str),
     SoundFileListing(&'a str),
