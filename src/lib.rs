@@ -6,5 +6,4 @@ pub mod client;
 pub mod enums;
 pub mod error;
 pub mod request;
-pub mod attendance;
-pub mod grade;
+pub mod model;

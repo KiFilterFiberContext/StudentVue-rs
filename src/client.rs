@@ -2,8 +2,7 @@ use crate::{
     request::WebHandle,
     WebResult,
     enums::*,
-    attendance::*,
-    grade::*,
+    model::*,
 };
 use std::{
     borrow::Cow,
@@ -63,7 +62,7 @@ impl<'c> Client<'c> {
     }
 
     #[inline]
-    pub async fn get_grades(&self, report_period: Option<u64>) -> WebResult<GbData> {
+    pub async fn get_grades(&self, report_period: Option<u64>) -> WebResult<grade::GbData> {
         let parms = if report_period.is_none() {
             ParamBuilder::create()
         } else {
@@ -78,7 +77,7 @@ impl<'c> Client<'c> {
     }
 
     #[inline]
-    pub async fn get_absences(&self) -> WebResult<AttData> {
+    pub async fn get_attendance(&self) -> WebResult<attendance::AttData> {
         let xml_data = self.call_service(WebServiceHandle::PXPWebServices, Method::Attendance, ParamBuilder::create())
             .await?;
 

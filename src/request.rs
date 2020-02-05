@@ -45,7 +45,6 @@ impl WebHandle {
     /// }
     /// ```
     ///
-    #[inline]
     pub async fn make_web_request<R, M, S>(uri: R, method: M, params: S, headers: &HeaderMap) -> Result<Response, reqwest::Error>
     where
         R: AsRef<str>,
@@ -79,6 +78,7 @@ impl WebHandle {
     /// }
     /// ```
     ///
+    #[inline]
     pub async fn send(uri: impl AsRef<str>, params: impl serde::Serialize) -> Result<String, reqwest::Error> {
         let req = WebHandle::make_web_request(uri, Method::POST, params, DEFAULT_HEADERS.deref())
             .await?
