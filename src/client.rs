@@ -2,7 +2,8 @@ use crate::{
     request::WebHandle,
     WebResult,
     enums::*,
-    xml::*,
+    attendance::*,
+    grade::*,
 };
 use std::{
     borrow::Cow,
@@ -11,7 +12,6 @@ use std::{
 };
 use quick_xml::de;
 use serde::Deserialize;
-use std::ops::Deref;
 
 // POST request endpoint (ProcessWebServiceRequest is redundant for SOAP requests)
 // In this case since we are solely making regular POST requests it is required
