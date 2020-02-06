@@ -26,7 +26,7 @@ async fn main() {
     });
 }
 ```
-__Docs__: https://docs.rs/studentvue
+__Docs__: https://crates.io/crates/studentvue
 
 ## License
 MIT
