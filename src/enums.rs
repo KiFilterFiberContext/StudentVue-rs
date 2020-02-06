@@ -1,9 +1,13 @@
+//! Enums containing types of information which can be used for various API calls
+
+/// Service handles
 #[derive(Debug)]
 pub enum WebServiceHandle {
     PXPWebServices,
     HDInfoServices,
 }
 
+/// Various methods necessary to retrieve different types of API data
 #[derive(Debug)]
 pub enum Method {
     Attendance,
@@ -42,12 +46,14 @@ pub enum Method {
     StudentClassList,
 }
 
+/// Language codes for xml responses
 #[derive(Debug, PartialEq, PartialOrd)]
 pub enum Language {
     English = 0,
     Spanish = 1,
 }
 
+/// Different types of parameters needed for certain methods
 #[derive(Debug, PartialEq)]
 pub enum ParamType<'a> {
     ChildIntID(u64),

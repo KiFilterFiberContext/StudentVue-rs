@@ -1,4 +1,8 @@
-use crate::WebResult;
+//! HTTP client wrapper
+//!
+//! This module contains `WebHandle` which is a simple wrapper over [Client](https://docs.rs/reqwest/0.10.1/reqwest/struct.Client.html)
+//! used to communicate with a web server without needing numerous parameters
+
 use std::ops::Deref;
 use reqwest::{
     Client,
@@ -10,7 +14,7 @@ use reqwest::{
 use lazy_static::lazy_static;
 
 lazy_static! {
-    pub static ref DEFAULT_HEADERS: HeaderMap<HeaderValue> = {
+    static ref DEFAULT_HEADERS: HeaderMap<HeaderValue> = {
         let mut hm = HeaderMap::with_capacity(3);
         hm.insert(CONTENT_TYPE, "application/x-www-form-urlencoded".parse().unwrap());
         hm.insert(ACCEPT_ENCODING, "gzip".parse().unwrap());
@@ -27,6 +31,8 @@ pub struct WebHandle;
 impl WebHandle {
     /// Asynchronously sends a HTTP Request requiring manual parameters which returns a [Response](https://docs.rs/reqwest/0.10.1/reqwest/struct.Response.html)
     ///
+    /// # Example
+    ///
     /// ```
     /// use studentvue::request::WebHandle;
     /// use reqwest::{
@@ -35,7 +41,7 @@ impl WebHandle {
     /// };
     ///
     /// #[tokio::main]
-    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// async fn main() -> Result<(), reqwest::Error> {
     ///     let params: Vec<&str> = Vec::new();
     ///     let req = WebHandle::make_web_request("https://www.google.com", Method::POST, params, &HeaderMap::new())
     ///         .await?;
@@ -45,6 +51,7 @@ impl WebHandle {
     /// }
     /// ```
     ///
+    #[inline]
     pub async fn make_web_request<R, M, S>(uri: R, method: M, params: S, headers: &HeaderMap) -> Result<Response, reqwest::Error>
     where
         R: AsRef<str>,
@@ -63,22 +70,21 @@ impl WebHandle {
     }
 
     /// Asynchronously sends a POST request to the corresponding WebService endpoint or an optional url with specified parameters
-    /// Optionally HTML escapes the response
+    ///
+    /// # Example
     ///
     /// ```
     /// use studentvue::request::WebHandle;
     ///
     /// #[tokio::main]
-    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// async fn main() -> Result<(), reqwest::Error> {
     ///     let res = WebHandle::send("https://afsd.edupoint.com/Service/PXPCommunication.asmx/ProcessWebServiceRequest", &[("key", "value")])
     ///         .await?;
     ///
-    ///     // ...
     ///     Ok(())
     /// }
     /// ```
     ///
-    #[inline]
     pub async fn send(uri: impl AsRef<str>, params: impl serde::Serialize) -> Result<String, reqwest::Error> {
         let req = WebHandle::make_web_request(uri, Method::POST, params, DEFAULT_HEADERS.deref())
             .await?

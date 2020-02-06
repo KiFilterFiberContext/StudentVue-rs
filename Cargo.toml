@@ -3,6 +3,12 @@ name = "studentvue"
 version = "0.1.0"
 authors = ["13laze"]
 edition = "2018"
+license = "MIT"
+description = "StudentVue Rust API"
+readme = "README.md"
+documentation = "https://docs.rs/studentvue"
+repository = "https://github.com/13laze/StudentVue-rs/"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

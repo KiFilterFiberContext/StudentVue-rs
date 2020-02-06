@@ -21,16 +21,12 @@ async fn main() {
         .await
         .expect("Could not retrieve grades!");
     
-    grades.gradebook.courses.course.iter().for_each(|x|
+    grades.gradebook.courses.course.iter().for_each(|x| {
         println!("{}", x.class_name)
-    );
+    });
 }
 ```
-
-## TODO
-- [ ] Reduce Allocations
-- [ ] Documentation
-- [ ] Full Unit Testing
+__Docs__: https://docs.rs/studentvue
 
 ## License
 MIT
