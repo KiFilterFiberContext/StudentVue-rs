@@ -1,5 +1,6 @@
 # StudentVue-rs
 [![Build Status](https://travis-ci.com/13laze/StudentVue-rs.svg?token=SpHdVJ8r5mp8isWTpdaF&branch=master)](https://travis-ci.com/13laze/StudentVue-rs)
+![crates.io](https://img.shields.io/crates/v/studentvue.svg)
 
 > An asynchronous Rust API to access various services offered by the StudentVUE App
 
