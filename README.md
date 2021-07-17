@@ -1,5 +1,5 @@
 # StudentVue-rs
-[![Build Status](https://travis-ci.com/13laze/StudentVue-rs.svg?token=SpHdVJ8r5mp8isWTpdaF&branch=master)](https://travis-ci.com/13laze/StudentVue-rs)
+[![Build Status](https://travis-ci.com/encls/StudentVue-rs.svg?token=SpHdVJ8r5mp8isWTpdaF&branch=master)](https://travis-ci.com/13laze/StudentVue-rs)
 ![crates.io](https://img.shields.io/crates/v/studentvue.svg)
 
 > An asynchronous Rust API to access various services offered by the StudentVUE App
@@ -17,7 +17,7 @@ use studentvue::client::Client;
 
 #[tokio::main]
 async fn main() {
-    let client = Client::create("https://afsd.edupoint.com/", env!("SID"), env!("SPWD"));
+    let client = Client::create("https://[StudentVUE endpoint]/", env!("SID"), env!("SPWD"));
     let grades = client.get_grades(None)
         .await
         .expect("Could not retrieve grades!");
